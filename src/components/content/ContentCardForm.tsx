@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import type { ContentCard, ContentType, Platform } from '@/types'
 import { useContentStore } from '@/store/contentStore'
 import { useAuthStore } from '@/store/authStore'
+import { useTeamStore } from '@/store/teamStore'
 import { useFileUpload } from '@/hooks/useFileUpload'
 import { Input } from '@/components/ui/Input'
 import { Textarea } from '@/components/ui/Textarea'
@@ -36,6 +37,7 @@ function generateContentId(type: ContentType): string {
 export function ContentCardForm({ card, onSave, onCancel }: Props) {
   const { upsertCard } = useContentStore()
   const { profile } = useAuthStore()
+  const { currentTeamId } = useTeamStore()
   const { toast } = useToast()
 
   const cardId = card?.id ?? crypto.randomUUID()
@@ -116,6 +118,7 @@ export function ContentCardForm({ card, onSave, onCancel }: Props) {
         caption: form.caption || null,
         notes: form.notes || null,
         assigned_reviewer_id: card?.assigned_reviewer_id ?? null,
+        team_id: card?.team_id ?? currentTeamId ?? null,
       } as Partial<ContentCard>
       const saved = await upsertCard(payload)
       toast(card ? 'Card updated' : 'Card created')

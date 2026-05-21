@@ -4,6 +4,7 @@ import './index.css'
 import App from './App.tsx'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
+import { useTeamStore } from '@/store/teamStore'
 
 // Apply dark mode before React renders to prevent flash
 const darkMode = (() => {
@@ -23,16 +24,28 @@ document.documentElement.classList.toggle('dark', darkMode)
 // Bootstrap auth state
 const { setSession, setLoading, fetchProfile } = useAuthStore.getState()
 
-supabase.auth.getSession().then(({ data: { session } }) => {
+const { fetchTeams, fetchMyMemberships } = useTeamStore.getState()
+
+async function bootstrapSession(session: Parameters<typeof setSession>[0]) {
   setSession(session)
-  if (session) fetchProfile(session.user.id)
-  setLoading(false)
+  if (session) {
+    await fetchProfile(session.user.id)
+    await fetchTeams()
+    await fetchMyMemberships(session.user.id)
+  }
+}
+
+supabase.auth.getSession().then(({ data: { session } }) => {
+  bootstrapSession(session).finally(() => setLoading(false))
 })
 
 supabase.auth.onAuthStateChange((_event, session) => {
-  setSession(session)
-  if (session) fetchProfile(session.user.id)
-  else useAuthStore.setState({ profile: null })
+  if (session) {
+    bootstrapSession(session)
+  } else {
+    setSession(null)
+    useAuthStore.setState({ profile: null })
+  }
 })
 
 createRoot(document.getElementById('root')!).render(

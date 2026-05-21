@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import type { ContentCard, ContentStatus, ContentType, Platform } from '@/types'
 import { supabase } from '@/lib/supabase'
 import { ALLOWED_TRANSITIONS, STATUS_ORDER } from '@/lib/constants'
+import { useTeamStore } from './teamStore'
 
 interface Filters {
   platform: Platform | null
@@ -43,10 +44,13 @@ export const useContentStore = create<ContentState>((set, get) => ({
 
   fetchCards: async () => {
     set({ loading: true })
-    const { data, error } = await supabase
+    const { currentTeamId } = useTeamStore.getState()
+    let query = supabase
       .from('content_cards')
       .select('*, owner:profiles!owner_id(full_name, avatar_url, email)')
       .order('created_at', { ascending: false })
+    if (currentTeamId) query = query.eq('team_id', currentTeamId)
+    const { data, error } = await query
     if (!error && data) set({ cards: data as ContentCard[] })
     set({ loading: false })
   },

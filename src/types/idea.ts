@@ -11,6 +11,7 @@ export interface Idea {
   status: IdeaStatus
   promoted_card_id: string | null
   owner_id: string
+  team_id: string | null
   created_at: string
   updated_at: string
   owner?: {

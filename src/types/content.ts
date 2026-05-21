@@ -58,6 +58,7 @@ export interface ContentCard {
   file_url: string | null
   owner_id: string
   assigned_reviewer_id: string | null
+  team_id: string | null
   created_at: string
   updated_at: string
   owner?: {

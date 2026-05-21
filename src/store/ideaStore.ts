@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { Idea, ContentType } from '@/types'
 import { supabase } from '@/lib/supabase'
+import { useTeamStore } from './teamStore'
 
 interface IdeaFilters {
   tags: string[]
@@ -28,18 +29,22 @@ export const useIdeaStore = create<IdeaState>((set, get) => ({
 
   fetchIdeas: async () => {
     set({ loading: true })
-    const { data, error } = await supabase
+    const { currentTeamId } = useTeamStore.getState()
+    let query = supabase
       .from('ideas')
       .select('*, owner:profiles!owner_id(full_name, avatar_url)')
       .order('created_at', { ascending: false })
+    if (currentTeamId) query = query.eq('team_id', currentTeamId)
+    const { data, error } = await query
     if (!error && data) set({ ideas: data as Idea[] })
     set({ loading: false })
   },
 
   createIdea: async (idea) => {
+    const { currentTeamId } = useTeamStore.getState()
     const { data, error } = await supabase
       .from('ideas')
-      .insert(idea)
+      .insert({ ...idea, team_id: idea.team_id ?? currentTeamId ?? null })
       .select('*, owner:profiles!owner_id(full_name, avatar_url)')
       .single()
     if (error) throw error

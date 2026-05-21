@@ -2,3 +2,4 @@ export type { ContentType, Platform, ContentStatus, ContentCard, StatusHistory }
 export type { UserRole, Profile } from './user'
 export type { IdeaStatus, Idea } from './idea'
 export type { Comment, Notification } from './comment'
+export type { Team, TeamMembership, SocialAccount } from './team'
