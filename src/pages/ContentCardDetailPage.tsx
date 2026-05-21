@@ -15,6 +15,7 @@ import { PageSpinner } from '@/components/ui/Spinner'
 import { CONTENT_TYPE_LABELS, PLATFORM_LABELS } from '@/lib/constants'
 import { formatDate } from '@/lib/dateUtils'
 import { Edit3, ArrowLeft, Trash2, FileText, MessageSquare, ExternalLink, FolderOpen, Calendar, CheckCircle2, Circle, Link2 } from 'lucide-react'
+import { renderMarkdown } from '@/components/ui/RichTextEditor'
 import { useToast } from '@/components/ui/Toast'
 import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
@@ -198,9 +199,12 @@ function BriefCaptionView({ card, onSaveBriefLink }: { card: ContentCard; onSave
 
             {briefMode === 'write' ? (
               card.notes ? (
-                <p className="text-sm text-white/65 leading-relaxed whitespace-pre-wrap">{card.notes}</p>
+                <div
+                  className="rich-preview"
+                  dangerouslySetInnerHTML={{ __html: renderMarkdown(card.notes) }}
+                />
               ) : (
-                <p className="text-sm text-white/25 italic">No brief written yet. Edit this card to add a content brief.</p>
+                <p className="text-sm text-white/25 italic">No brief written yet. Edit this card to add one.</p>
               )
             ) : (
               <div className="flex flex-col gap-2">

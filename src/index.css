@@ -145,3 +145,24 @@ html.dark body {
 
 /* ── Table row hover ── */
 .table-row:hover { background: rgba(255,255,255,0.025); }
+
+/* ── Rich text preview ── */
+.rich-preview { font-size: 13px; line-height: 1.7; color: rgba(255,255,255,0.65); }
+.rich-preview .rt-h1 { font-size: 1.15em; font-weight: 800; color: rgba(255,255,255,0.9); margin: 12px 0 6px; }
+.rich-preview .rt-h2 { font-size: 1.05em; font-weight: 700; color: rgba(255,255,255,0.85); margin: 10px 0 5px; }
+.rich-preview .rt-h3 { font-size: 0.95em; font-weight: 700; color: rgba(255,255,255,0.75); margin: 8px 0 4px; }
+.rich-preview .rt-p  { margin: 3px 0; }
+.rich-preview .rt-hr { border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 10px 0; }
+.rich-preview .rt-ul, .rich-preview .rt-ol { padding-left: 20px; margin: 4px 0; }
+.rich-preview .rt-ul li { list-style: disc; margin: 2px 0; }
+.rich-preview .rt-ol li { list-style: decimal; margin: 2px 0; }
+.rich-preview .rt-placeholder { color: rgba(255,255,255,0.2); font-style: italic; }
+.rich-preview strong { font-weight: 700; color: rgba(255,255,255,0.9); }
+.rich-preview em { font-style: italic; color: rgba(255,255,255,0.7); }
+
+/* ── Drawer slide-in ── */
+@keyframes slide-in-right {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+.animate-slide-in-right { animation: slide-in-right 0.22s cubic-bezier(0.4,0,0.2,1) forwards; }

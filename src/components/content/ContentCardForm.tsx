@@ -19,6 +19,7 @@ import {
   SELECTABLE_PLATFORMS,
 } from '@/lib/constants'
 import { Link2, HardDrive, Hash } from 'lucide-react'
+import { RichTextEditor } from '@/components/ui/RichTextEditor'
 
 interface Props {
   card?: ContentCard
@@ -272,20 +273,18 @@ export function ContentCardForm({ card, onSave, onCancel }: Props) {
         </div>
         <div className="px-3 pb-3 flex flex-col gap-3">
           {contentTab === 'brief' ? (
-            <Textarea
-              label=""
+            <RichTextEditor
               value={form.notes}
-              onChange={(e) => set('notes', e.target.value)}
+              onChange={(v) => set('notes', v)}
               placeholder="Write the content brief — objectives, tone, key messages, references…"
-              rows={6}
+              rows={7}
             />
           ) : (
             <>
               <div className="flex flex-col gap-2">
-                <Textarea
-                  label=""
+                <RichTextEditor
                   value={form.caption}
-                  onChange={(e) => set('caption', e.target.value)}
+                  onChange={(v) => set('caption', v)}
                   placeholder="Write your social media caption…"
                   rows={4}
                 />
