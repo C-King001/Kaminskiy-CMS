@@ -218,7 +218,6 @@ function AccountCard({
 export function AnalyticsPage() {
   const { currentTeamId, currentTeam, teams, socialAccounts, fetchSocialAccounts } = useTeamStore()
   const cards = useContentStore((s) => s.cards)
-  const profile = useTeamStore((s) => s.currentTeam)
 
   const team = currentTeam()
 
