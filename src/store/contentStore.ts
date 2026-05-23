@@ -3,6 +3,7 @@ import type { ContentCard, ContentStatus, ContentType, Platform } from '@/types'
 import { supabase } from '@/lib/supabase'
 import { ALLOWED_TRANSITIONS, STATUS_ORDER } from '@/lib/constants'
 import { useTeamStore } from './teamStore'
+import { useAuthStore } from './authStore'
 
 interface Filters {
   platform: Platform | null
@@ -45,7 +46,6 @@ export const useContentStore = create<ContentState>((set, get) => ({
   fetchCards: async () => {
     set({ loading: true })
     const { currentTeamId, isAllTeamsView, myTeamIds } = useTeamStore.getState()
-    const { useAuthStore } = await import('./authStore')
     const role = useAuthStore.getState().profile?.role
     const isGlobal = role === 'admin' || role === 'manager' || isAllTeamsView
 
