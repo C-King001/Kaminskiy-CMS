@@ -1,12 +1,12 @@
 import { create } from 'zustand'
 import type { Idea, ContentType } from '@/types'
 import { supabase } from '@/lib/supabase'
-import { useTeamStore } from './teamStore'
 
 interface IdeaFilters {
   tags: string[]
   contentType: ContentType | null
   search: string
+  teamId: string | null
 }
 
 interface IdeaState {
@@ -25,17 +25,14 @@ interface IdeaState {
 export const useIdeaStore = create<IdeaState>((set, get) => ({
   ideas: [],
   loading: false,
-  filters: { tags: [], contentType: null, search: '' },
+  filters: { tags: [], contentType: null, search: '', teamId: null },
 
   fetchIdeas: async () => {
     set({ loading: true })
-    const { currentTeamId } = useTeamStore.getState()
-    let query = supabase
+    const { data, error } = await supabase
       .from('ideas')
       .select('*, owner:profiles!owner_id(full_name, avatar_url)')
       .order('created_at', { ascending: false })
-    if (currentTeamId) query = query.eq('team_id', currentTeamId)
-    const { data, error } = await query
     if (!error && data) set({ ideas: data as Idea[] })
     set({ loading: false })
   },
@@ -88,6 +85,7 @@ export const useIdeaStore = create<IdeaState>((set, get) => ({
       if (filters.contentType && i.content_type !== filters.contentType) return false
       if (filters.tags.length > 0 && !filters.tags.some((t) => i.tags.includes(t))) return false
       if (filters.search && !i.title.toLowerCase().includes(filters.search.toLowerCase())) return false
+      if (filters.teamId && i.team_id !== filters.teamId) return false
       return true
     })
   },

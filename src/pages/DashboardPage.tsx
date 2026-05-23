@@ -3,9 +3,11 @@ import { useContentStore } from '@/store/contentStore'
 import { PageSpinner } from '@/components/ui/Spinner'
 import { Button } from '@/components/ui/Button'
 import { PipelineTableView } from '@/components/pipeline/PipelineTableView'
+import { TeamBreakdownWidget } from '@/components/dashboard/TeamBreakdownWidget'
 import { Plus, Sparkles, FileText, Clock, CheckCircle2, Radio } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
+import { useTeamStore, canSeeAllTeams } from '@/store/teamStore'
 import { ROLE_LABELS } from '@/lib/constants'
 
 const UNDER_REVIEW_STATUSES = new Set([
@@ -56,6 +58,8 @@ export function DashboardPage() {
   const { fetchCards, loading, cards } = useContentStore()
   const navigate = useNavigate()
   const profile = useAuthStore((s) => s.profile)
+  const { isAllTeamsView, myTeamIds } = useTeamStore()
+  const showTeamBreakdown = canSeeAllTeams(profile?.role, myTeamIds) && isAllTeamsView
 
   useEffect(() => { fetchCards() }, [])
 
@@ -124,6 +128,9 @@ export function DashboardPage() {
               color="#ec4899"
             />
           </div>
+
+          {/* Team breakdown — shown in All Teams view */}
+          {showTeamBreakdown && <TeamBreakdownWidget />}
 
           {/* Content Pipeline table */}
           <div

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { ContentType } from '@/types'
 import { useIdeaStore } from '@/store/ideaStore'
 import { useAuthStore } from '@/store/authStore'
+import { useTeamStore, canSeeAllTeams } from '@/store/teamStore'
 import { Input } from '@/components/ui/Input'
 import { Textarea } from '@/components/ui/Textarea'
 import { Select } from '@/components/ui/Select'
@@ -22,8 +23,10 @@ const CONTENT_TYPE_OPTIONS = [
 export function IdeaForm({ onClose }: Props) {
   const { createIdea } = useIdeaStore()
   const profile = useAuthStore((s) => s.profile)
+  const { teams, currentTeamId, myTeamIds } = useTeamStore()
   const { toast } = useToast()
-  const [form, setForm] = useState({ title: '', description: '', content_type: '', tagInput: '', tags: [] as string[] })
+  const showTeamSelector = canSeeAllTeams(profile?.role, myTeamIds)
+  const [form, setForm] = useState({ title: '', description: '', content_type: '', tagInput: '', tags: [] as string[], team_id: currentTeamId ?? '' })
   const [loading, setLoading] = useState(false)
 
   const addTag = () => {
@@ -43,6 +46,7 @@ export function IdeaForm({ onClose }: Props) {
         content_type: (form.content_type as ContentType) || null,
         tags: form.tags,
         owner_id: profile.id,
+        team_id: form.team_id || currentTeamId || null,
       })
       toast('Idea added to bank')
       onClose?.()
@@ -73,6 +77,32 @@ export function IdeaForm({ onClose }: Props) {
         onChange={(e) => setForm((f) => ({ ...f, content_type: e.target.value }))}
         options={CONTENT_TYPE_OPTIONS}
       />
+
+      {showTeamSelector && teams.length > 0 && (
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[11px] font-medium text-white/40">Team</span>
+          <div className="flex flex-wrap gap-1.5">
+            {teams.map((t) => {
+              const selected = form.team_id === t.id
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setForm((f) => ({ ...f, team_id: t.id }))}
+                  className="px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all"
+                  style={{
+                    backgroundColor: selected ? `${t.color}20` : 'transparent',
+                    borderColor: selected ? `${t.color}60` : 'rgba(255,255,255,0.08)',
+                    color: selected ? t.color : 'rgba(255,255,255,0.35)',
+                  }}
+                >
+                  {t.name}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
       <div className="flex gap-2">
         <input
           value={form.tagInput}

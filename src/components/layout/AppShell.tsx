@@ -24,6 +24,7 @@ export function AppShell() {
   const location = useLocation()
   const profile = useAuthStore((s) => s.profile)
   const currentTeamId = useTeamStore((s) => s.currentTeamId)
+  const isAllTeamsView = useTeamStore((s) => s.isAllTeamsView)
   const fetchCards = useContentStore((s) => s.fetchCards)
   const fetchIdeas = useIdeaStore((s) => s.fetchIdeas)
 
@@ -32,7 +33,7 @@ export function AppShell() {
   useEffect(() => {
     fetchCards()
     fetchIdeas()
-  }, [currentTeamId])
+  }, [currentTeamId, isAllTeamsView])
 
   const title = PAGE_TITLES[location.pathname] ?? 'Content Card'
 

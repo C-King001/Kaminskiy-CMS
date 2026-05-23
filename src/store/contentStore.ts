@@ -44,12 +44,24 @@ export const useContentStore = create<ContentState>((set, get) => ({
 
   fetchCards: async () => {
     set({ loading: true })
-    const { currentTeamId } = useTeamStore.getState()
+    const { currentTeamId, isAllTeamsView, myTeamIds } = useTeamStore.getState()
+    const { useAuthStore } = await import('./authStore')
+    const role = useAuthStore.getState().profile?.role
+    const isGlobal = role === 'admin' || role === 'manager' || isAllTeamsView
+
     let query = supabase
       .from('content_cards')
       .select('*, owner:profiles!owner_id(full_name, avatar_url, email)')
       .order('created_at', { ascending: false })
-    if (currentTeamId) query = query.eq('team_id', currentTeamId)
+
+    if (!isGlobal) {
+      if (currentTeamId) {
+        query = query.eq('team_id', currentTeamId)
+      } else if (myTeamIds.length > 0) {
+        query = query.in('team_id', myTeamIds)
+      }
+    }
+
     const { data, error } = await query
     if (!error && data) set({ cards: data as ContentCard[] })
     set({ loading: false })

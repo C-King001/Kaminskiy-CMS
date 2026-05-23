@@ -2,11 +2,11 @@ import { useState, useRef, useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, Columns3, Calendar, Users, Settings,
-  ChevronLeft, ChevronRight, LogOut, Lightbulb, BarChart3, ChevronDown, Check,
+  ChevronLeft, ChevronRight, LogOut, Lightbulb, BarChart3, ChevronDown, Check, Globe,
 } from 'lucide-react'
 import { useUIStore } from '@/store/uiStore'
 import { useAuthStore } from '@/store/authStore'
-import { useTeamStore } from '@/store/teamStore'
+import { useTeamStore, canSeeAllTeams } from '@/store/teamStore'
 import { Avatar } from '@/components/ui/Avatar'
 import { ROLE_LABELS } from '@/lib/constants'
 
@@ -20,11 +20,13 @@ const NAV_ITEMS = [
 ]
 
 function TeamSwitcher({ collapsed }: { collapsed: boolean }) {
-  const { teams, currentTeamId, setCurrentTeam } = useTeamStore()
+  const { teams, currentTeamId, isAllTeamsView, setCurrentTeam, setAllTeamsView, myTeamIds } = useTeamStore()
+  const profile = useAuthStore((s) => s.profile)
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
   const current = teams.find((t) => t.id === currentTeamId) ?? teams[0]
+  const showAllTeamsOption = canSeeAllTeams(profile?.role, myTeamIds)
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -42,14 +44,17 @@ function TeamSwitcher({ collapsed }: { collapsed: boolean }) {
         onClick={() => setOpen((v) => !v)}
         className={`w-full flex items-center gap-2 px-2 py-2 rounded-xl hover:bg-white/[0.05] transition-all ${collapsed ? 'justify-center' : ''}`}
       >
-        <div
-          className="w-5 h-5 rounded-md shrink-0"
-          style={{ backgroundColor: current?.color ?? '#22c55e' }}
-        />
+        {isAllTeamsView ? (
+          <div className="w-5 h-5 rounded-md shrink-0 flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #22c55e, #3b82f6, #f97316)' }}>
+            <Globe size={11} className="text-white" />
+          </div>
+        ) : (
+          <div className="w-5 h-5 rounded-md shrink-0" style={{ backgroundColor: current?.color ?? '#22c55e' }} />
+        )}
         {!collapsed && (
           <>
             <span className="flex-1 text-left text-xs font-bold text-white/70 truncate">
-              {current?.name ?? 'Select Team'}
+              {isAllTeamsView ? 'All Teams' : (current?.name ?? 'Select Team')}
             </span>
             <ChevronDown size={12} className={`text-white/30 transition-transform ${open ? 'rotate-180' : ''}`} />
           </>
@@ -64,6 +69,20 @@ function TeamSwitcher({ collapsed }: { collapsed: boolean }) {
           <p className="text-[9px] font-bold uppercase tracking-widest text-white/25 px-3 pt-2.5 pb-1.5">
             Switch Team
           </p>
+
+          {showAllTeamsOption && (
+            <button
+              onClick={() => { setAllTeamsView(true); setOpen(false) }}
+              className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-white/[0.06] transition-all text-left"
+            >
+              <div className="w-4 h-4 rounded-md shrink-0 flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #22c55e, #3b82f6, #f97316)' }}>
+                <Globe size={9} className="text-white" />
+              </div>
+              <span className="flex-1 text-xs font-semibold text-white/70 truncate">All Teams</span>
+              {isAllTeamsView && <Check size={11} className="text-[#22c55e] shrink-0" />}
+            </button>
+          )}
+
           {teams.map((team) => (
             <button
               key={team.id}
@@ -72,7 +91,7 @@ function TeamSwitcher({ collapsed }: { collapsed: boolean }) {
             >
               <div className="w-4 h-4 rounded-md shrink-0" style={{ backgroundColor: team.color }} />
               <span className="flex-1 text-xs font-semibold text-white/70 truncate">{team.name}</span>
-              {team.id === currentTeamId && <Check size={11} className="text-[#22c55e] shrink-0" />}
+              {!isAllTeamsView && team.id === currentTeamId && <Check size={11} className="text-[#22c55e] shrink-0" />}
             </button>
           ))}
         </div>

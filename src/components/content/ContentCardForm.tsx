@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import type { ContentCard, ContentType, Platform } from '@/types'
 import { useContentStore } from '@/store/contentStore'
 import { useAuthStore } from '@/store/authStore'
-import { useTeamStore } from '@/store/teamStore'
+import { useTeamStore, canSeeAllTeams } from '@/store/teamStore'
 import { useFileUpload } from '@/hooks/useFileUpload'
 import { Input } from '@/components/ui/Input'
 import { Textarea } from '@/components/ui/Textarea'
@@ -38,8 +38,9 @@ function generateContentId(type: ContentType): string {
 export function ContentCardForm({ card, onSave, onCancel }: Props) {
   const { upsertCard } = useContentStore()
   const { profile } = useAuthStore()
-  const { currentTeamId } = useTeamStore()
+  const { currentTeamId, teams, myTeamIds } = useTeamStore()
   const { toast } = useToast()
+  const showTeamSelector = canSeeAllTeams(profile?.role, myTeamIds)
 
   const cardId = card?.id ?? crypto.randomUUID()
   const { upload, uploading } = useFileUpload(cardId)
@@ -71,6 +72,7 @@ export function ContentCardForm({ card, onSave, onCancel }: Props) {
     file_url: card?.file_url ?? '',
     owner_id: card?.owner_id ?? profile?.id ?? '',
     status: card?.status ?? 'idea',
+    team_id: card?.team_id ?? currentTeamId ?? null,
   })
 
   const [contentTab, setContentTab] = useState<'brief' | 'caption'>('brief')
@@ -119,7 +121,7 @@ export function ContentCardForm({ card, onSave, onCancel }: Props) {
         caption: form.caption || null,
         notes: form.notes || null,
         assigned_reviewer_id: card?.assigned_reviewer_id ?? null,
-        team_id: card?.team_id ?? currentTeamId ?? null,
+        team_id: form.team_id ?? currentTeamId ?? null,
       } as Partial<ContentCard>
       const saved = await upsertCard(payload)
       toast(card ? 'Card updated' : 'Card created')
@@ -169,6 +171,33 @@ export function ContentCardForm({ card, onSave, onCancel }: Props) {
         onChange={(e) => set('content_type', e.target.value as ContentType)}
         options={CONTENT_TYPES}
       />
+
+      {/* Team selector (shown to admins and multi-team users) */}
+      {showTeamSelector && teams.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <span className="text-xs font-medium text-white/50">Team</span>
+          <div className="flex flex-wrap gap-1.5">
+            {teams.map((t) => {
+              const selected = form.team_id === t.id
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => set('team_id', t.id)}
+                  className="px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all"
+                  style={{
+                    backgroundColor: selected ? `${t.color}20` : 'transparent',
+                    borderColor: selected ? `${t.color}60` : 'rgba(255,255,255,0.08)',
+                    color: selected ? t.color : 'rgba(255,255,255,0.35)',
+                  }}
+                >
+                  {t.name}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Multi-platform select */}
       <div className="flex flex-col gap-2">

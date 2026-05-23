@@ -4,6 +4,7 @@ import { Avatar } from '@/components/ui/Avatar'
 import { PlatformIcon } from '@/components/ui/PlatformIcon'
 import { CONTENT_TYPE_COLORS, CONTENT_TYPE_LABELS, STATUS_COLORS, STATUS_LABELS } from '@/lib/constants'
 import { formatScheduledDate } from '@/lib/dateUtils'
+import { useTeamStore } from '@/store/teamStore'
 import { Calendar } from 'lucide-react'
 
 interface Props {
@@ -13,9 +14,12 @@ interface Props {
 
 export function ContentCardTile({ card, compact }: Props) {
   const navigate = useNavigate()
+  const teams = useTeamStore((s) => s.teams)
+  const isAllTeamsView = useTeamStore((s) => s.isAllTeamsView)
   const typeColor = CONTENT_TYPE_COLORS[card.content_type]
   const statusColor = STATUS_COLORS[card.status]
   const platforms = card.platforms?.length ? card.platforms : [card.platform]
+  const cardTeam = isAllTeamsView ? teams.find((t) => t.id === card.team_id) : null
 
   const hasMedia = !!(card.file_url || card.drive_link)
   const isVideo = card.file_url?.includes('.mp4') || card.file_url?.includes('.mov')
@@ -51,6 +55,14 @@ export function ContentCardTile({ card, compact }: Props) {
         >
           {CONTENT_TYPE_LABELS[card.content_type]}
         </span>
+        {cardTeam && (
+          <span
+            className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+            style={{ backgroundColor: `${cardTeam.color}15`, color: cardTeam.color }}
+          >
+            {cardTeam.name}
+          </span>
+        )}
         {/* Platform icons */}
         {platforms.slice(0, 3).map((p) => (
           <PlatformIcon key={p} platform={p} />

@@ -3,9 +3,14 @@ import { persist } from 'zustand/middleware'
 import type { Team, SocialAccount } from '@/types'
 import { supabase } from '@/lib/supabase'
 
+export function canSeeAllTeams(role: string | undefined, myTeamIds: string[]): boolean {
+  return role === 'admin' || role === 'manager' || myTeamIds.length >= 2
+}
+
 interface TeamState {
   teams: Team[]
   currentTeamId: string | null
+  isAllTeamsView: boolean
   myTeamIds: string[]
   socialAccounts: SocialAccount[]
   loading: boolean
@@ -13,6 +18,7 @@ interface TeamState {
   fetchMyMemberships: (userId: string) => Promise<void>
   fetchSocialAccounts: (teamId: string) => Promise<void>
   setCurrentTeam: (id: string) => void
+  setAllTeamsView: (v: boolean) => void
   joinTeam: (teamId: string, userId: string) => Promise<void>
   leaveTeam: (teamId: string, userId: string) => Promise<void>
   upsertSocialAccount: (account: Partial<SocialAccount> & { team_id: string; platform: string }) => Promise<void>
@@ -24,6 +30,7 @@ export const useTeamStore = create<TeamState>()(
     (set, get) => ({
       teams: [],
       currentTeamId: null,
+      isAllTeamsView: false,
       myTeamIds: [],
       socialAccounts: [],
       loading: false,
@@ -65,8 +72,16 @@ export const useTeamStore = create<TeamState>()(
       },
 
       setCurrentTeam: (id) => {
-        set({ currentTeamId: id, socialAccounts: [] })
+        set({ currentTeamId: id, isAllTeamsView: false, socialAccounts: [] })
         get().fetchSocialAccounts(id)
+      },
+
+      setAllTeamsView: (v) => {
+        set({ isAllTeamsView: v })
+        if (!v) {
+          const { currentTeamId } = get()
+          if (currentTeamId) get().fetchSocialAccounts(currentTeamId)
+        }
       },
 
       joinTeam: async (teamId, userId) => {
@@ -105,7 +120,10 @@ export const useTeamStore = create<TeamState>()(
     }),
     {
       name: 'kcr-current-team',
-      partialize: (state) => ({ currentTeamId: state.currentTeamId }),
+      partialize: (state) => ({
+        currentTeamId: state.currentTeamId,
+        isAllTeamsView: state.isAllTeamsView,
+      }),
     }
   )
 )
