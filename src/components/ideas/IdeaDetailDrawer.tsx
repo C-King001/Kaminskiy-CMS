@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react'
-import type { Idea, ContentType } from '@/types'
+import type { Idea } from '@/types'
 import { useIdeaStore } from '@/store/ideaStore'
 import { useToast } from '@/components/ui/Toast'
 import { Avatar } from '@/components/ui/Avatar'
-import { RichTextEditor, renderMarkdown } from '@/components/ui/RichTextEditor'
+import { RichTextEditor } from '@/components/ui/RichTextEditor'
 import { CONTENT_TYPE_COLORS, CONTENT_TYPE_LABELS } from '@/lib/constants'
 import { formatRelative } from '@/lib/dateUtils'
 import { PromoteIdeaModal } from './PromoteIdeaModal'
 import {
-  X, Link2, ArrowRight, ExternalLink, Play, Youtube, Trash2,
+  X, Link2, ArrowRight, ExternalLink, Play, Trash2,
 } from 'lucide-react'
 
 // ─── Video helpers ────────────────────────────────────────────────────────────
@@ -247,7 +247,7 @@ export function IdeaDetailDrawer({ idea, onClose, onDelete }: Props) {
             ) : (
               <div className="flex flex-col gap-2">
                 <div className="relative">
-                  <Youtube size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/25" />
+                  <Play size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/25" />
                   <input
                     type="url"
                     value={refUrlInput}

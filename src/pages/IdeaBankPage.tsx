@@ -13,8 +13,6 @@ export function IdeaBankPage() {
   const { fetchIdeas, filteredIdeas, loading, ideas, deleteIdea, setFilter, filters } = useIdeaStore()
   const [showForm, setShowForm] = useState(false)
   const [selected, setSelected] = useState<Idea | null>(null)
-  const { toast } = { toast: (msg: string) => { /* handled by child */ void msg } }
-
   useEffect(() => { fetchIdeas() }, [])
 
   if (loading && ideas.length === 0) return <PageSpinner />

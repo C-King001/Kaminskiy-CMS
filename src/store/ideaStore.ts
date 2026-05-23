@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { Idea, ContentType } from '@/types'
 import { supabase } from '@/lib/supabase'
+import { useTeamStore } from './teamStore'
 
 interface IdeaFilters {
   tags: string[]
