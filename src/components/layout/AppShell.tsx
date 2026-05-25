@@ -3,13 +3,11 @@ import { useEffect } from 'react'
 import { Sidebar } from './Sidebar'
 import { TopBar } from './TopBar'
 import { MobileNav } from './MobileNav'
-import { ImpersonateBanner } from '@/components/superadmin/ImpersonateBanner'
 import { useRealtime } from '@/hooks/useRealtime'
 import { useAuthStore } from '@/store/authStore'
 import { useTeamStore } from '@/store/teamStore'
 import { useContentStore } from '@/store/contentStore'
 import { useIdeaStore } from '@/store/ideaStore'
-import { useSuperAdminStore } from '@/store/superAdminStore'
 
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard': 'Dashboard',
@@ -30,7 +28,6 @@ export function AppShell() {
   const isAllTeamsView = useTeamStore((s) => s.isAllTeamsView)
   const fetchCards = useContentStore((s) => s.fetchCards)
   const fetchIdeas = useIdeaStore((s) => s.fetchIdeas)
-  const { impersonating, stopImpersonation } = useSuperAdminStore()
 
   useRealtime(profile?.id)
 
@@ -59,16 +56,6 @@ export function AppShell() {
     <div className="flex h-screen bg-[#F7F6F3] dark:bg-[#0f1117] overflow-hidden">
       <Sidebar />
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-        {impersonating && (
-          <ImpersonateBanner
-            tenantName={impersonating.tenantName}
-            tenantColor={impersonating.tenantColor}
-            onExit={() => {
-              stopImpersonation()
-              navigate('/superadmin/tenants')
-            }}
-          />
-        )}
         <TopBar title={title} />
         <main className="flex-1 overflow-y-auto pb-16 md:pb-0">
           <Outlet />

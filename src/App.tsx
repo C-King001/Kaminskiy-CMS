@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { AppShell } from '@/components/layout/AppShell'
-import { SuperAdminShell, SuperAdminRoute } from '@/components/superadmin/SuperAdminShell'
 import { ToastProvider } from '@/components/ui/Toast'
 import { LoginPage } from '@/pages/auth/LoginPage'
 import { DashboardPage } from '@/pages/DashboardPage'
@@ -13,9 +12,6 @@ import { AdminPage } from '@/pages/AdminPage'
 import { AnalyticsPage } from '@/pages/AnalyticsPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
-import { TenantsPage } from '@/pages/superadmin/TenantsPage'
-import { BillingPage } from '@/pages/superadmin/BillingPage'
-import { GlobalAnalyticsPage } from '@/pages/superadmin/GlobalAnalyticsPage'
 
 export default function App() {
   return (
@@ -23,21 +19,6 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-
-          {/* SuperAdmin portal */}
-          <Route
-            path="/superadmin"
-            element={
-              <SuperAdminRoute>
-                <SuperAdminShell />
-              </SuperAdminRoute>
-            }
-          >
-            <Route index element={<Navigate to="/superadmin/tenants" replace />} />
-            <Route path="tenants" element={<TenantsPage />} />
-            <Route path="billing" element={<BillingPage />} />
-            <Route path="analytics" element={<GlobalAnalyticsPage />} />
-          </Route>
 
           {/* Main app */}
           <Route
