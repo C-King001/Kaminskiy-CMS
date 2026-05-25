@@ -9,7 +9,7 @@ import { Select } from '@/components/ui/Select'
 import { Button } from '@/components/ui/Button'
 import { useToast } from '@/components/ui/Toast'
 import { CONTENT_TYPE_LABELS } from '@/lib/constants'
-import { X } from 'lucide-react'
+import { X, Link } from 'lucide-react'
 
 interface Props {
   onClose?: () => void
@@ -26,7 +26,7 @@ export function IdeaForm({ onClose }: Props) {
   const { teams, currentTeamId, myTeamIds } = useTeamStore()
   const { toast } = useToast()
   const showTeamSelector = canSeeAllTeams(profile?.role, myTeamIds)
-  const [form, setForm] = useState({ title: '', description: '', content_type: '', tagInput: '', tags: [] as string[], team_id: currentTeamId ?? '' })
+  const [form, setForm] = useState({ title: '', description: '', content_type: '', reference_url: '', tagInput: '', tags: [] as string[], team_id: currentTeamId ?? '' })
   const [loading, setLoading] = useState(false)
 
   const addTag = () => {
@@ -45,6 +45,7 @@ export function IdeaForm({ onClose }: Props) {
         description: form.description || null,
         content_type: (form.content_type as ContentType) || null,
         tags: form.tags,
+        reference_url: form.reference_url.trim() || null,
         owner_id: profile.id,
         team_id: form.team_id || currentTeamId || null,
       })
@@ -71,6 +72,16 @@ export function IdeaForm({ onClose }: Props) {
         value={form.description}
         onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
       />
+      <div className="relative">
+        <Link size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none" />
+        <input
+          type="url"
+          placeholder="Reference URL (YouTube, TikTok, Instagram…)"
+          value={form.reference_url}
+          onChange={(e) => setForm((f) => ({ ...f, reference_url: e.target.value }))}
+          className="w-full pl-8 pr-3 py-2 text-sm rounded-xl border border-white/[0.08] bg-white/[0.04] text-white/70 placeholder-white/20 outline-none focus:ring-1 focus:ring-[#22c55e]/40 transition-all"
+        />
+      </div>
       <Select
         placeholder="Content type (optional)"
         value={form.content_type}
