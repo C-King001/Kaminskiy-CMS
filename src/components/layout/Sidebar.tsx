@@ -159,6 +159,30 @@ export function Sidebar() {
         ))}
       </nav>
 
+      {/* SuperAdmin link (admin only) */}
+      {isAdmin && (
+        <div className="px-2 pb-1">
+          <NavLink
+            to="/superadmin"
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-150 ${
+                isActive
+                  ? 'bg-violet-500/10 text-violet-300 border border-violet-500/20'
+                  : 'text-white/30 hover:text-white/60 hover:bg-white/[0.05]'
+              } ${!sidebarOpen ? 'justify-center px-0' : ''}`
+            }
+            title={!sidebarOpen ? 'SuperAdmin' : undefined}
+          >
+            {({ isActive }) => (
+              <>
+                <ShieldCheck size={15} className={`shrink-0 ${isActive ? 'text-violet-400' : ''}`} />
+                {sidebarOpen && <span>SuperAdmin</span>}
+              </>
+            )}
+          </NavLink>
+        </div>
+      )}
+
       {/* Settings + User */}
       <div className="border-t border-white/[0.06]">
         <NavLink
