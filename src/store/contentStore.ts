@@ -11,6 +11,9 @@ interface Filters {
   status: ContentStatus | null
   search: string
   ownerId: string | null
+  teamId: string | null
+  dateFrom: string | null
+  dateTo: string | null
 }
 
 interface ContentState {
@@ -36,6 +39,9 @@ const DEFAULT_FILTERS: Filters = {
   status: null,
   search: '',
   ownerId: null,
+  teamId: null,
+  dateFrom: null,
+  dateTo: null,
 }
 
 export const useContentStore = create<ContentState>((set, get) => ({
@@ -142,6 +148,9 @@ export const useContentStore = create<ContentState>((set, get) => ({
       if (filters.contentType && c.content_type !== filters.contentType) return false
       if (filters.status && c.status !== filters.status) return false
       if (filters.ownerId && c.owner_id !== filters.ownerId) return false
+      if (filters.teamId && c.team_id !== filters.teamId) return false
+      if (filters.dateFrom && c.scheduled_date && c.scheduled_date < filters.dateFrom) return false
+      if (filters.dateTo && c.scheduled_date && c.scheduled_date > filters.dateTo + 'T23:59:59') return false
       if (filters.search) {
         const q = filters.search.toLowerCase()
         const id = c.content_id?.toLowerCase() ?? ''

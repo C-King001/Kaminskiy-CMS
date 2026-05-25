@@ -28,16 +28,18 @@ function MetricCard({ icon, label, count, sub, color }: MetricCardProps) {
   return (
     <div
       className="flex flex-col gap-3 p-5 rounded-[14px] border border-white/[0.06] relative overflow-hidden"
-      style={{ backgroundColor: '#1a1d27' }}
+      style={{
+        background: `linear-gradient(145deg, #1a1d27 60%, ${color}0d 100%)`,
+      }}
     >
-      {/* Glow orb */}
+      {/* Radial glow */}
       <div
-        className="absolute -top-4 -right-4 w-20 h-20 rounded-full opacity-10 blur-xl pointer-events-none"
+        className="absolute -top-6 -right-6 w-24 h-24 rounded-full opacity-15 blur-2xl pointer-events-none"
         style={{ backgroundColor: color }}
       />
       <div
         className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-        style={{ backgroundColor: `${color}18` }}
+        style={{ backgroundColor: `${color}20`, border: `1px solid ${color}30` }}
       >
         <span style={{ color }}>{icon}</span>
       </div>
@@ -46,9 +48,10 @@ function MetricCard({ icon, label, count, sub, color }: MetricCardProps) {
         <div className="text-[11px] font-bold text-white/60 mb-0.5">{label}</div>
         <div className="text-[10px] text-white/25 font-medium">{sub}</div>
       </div>
+      {/* Bottom accent */}
       <div
-        className="absolute bottom-0 left-0 right-0 h-0.5 opacity-40"
-        style={{ backgroundColor: color }}
+        className="absolute bottom-0 left-0 right-0 h-[2px]"
+        style={{ background: `linear-gradient(90deg, ${color}70, transparent)` }}
       />
     </div>
   )

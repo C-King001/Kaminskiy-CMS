@@ -27,8 +27,8 @@ export function ContentCardTile({ card, compact }: Props) {
   return (
     <div
       onClick={() => navigate(`/content/${card.id}`)}
-      className="kanban-card border border-white/[0.06] rounded-[14px] p-3 cursor-pointer group animate-fade-up"
-      style={{ backgroundColor: '#1a1d27' }}
+      className="kanban-card border border-white/[0.06] rounded-[14px] p-3 cursor-pointer group animate-fade-up overflow-hidden"
+      style={{ backgroundColor: '#1a1d27', borderLeft: `3px solid ${statusColor}` }}
     >
       {/* Media thumbnail */}
       {hasMedia && !compact && (

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, Columns3, Calendar, Users, Settings,
-  ChevronLeft, ChevronRight, LogOut, Lightbulb, BarChart3, ChevronDown, Check, Globe,
+  ChevronLeft, ChevronRight, LogOut, Lightbulb, BarChart3, ChevronDown, Check, Globe, ShieldCheck,
 } from 'lucide-react'
 import { useUIStore } from '@/store/uiStore'
 import { useAuthStore } from '@/store/authStore'

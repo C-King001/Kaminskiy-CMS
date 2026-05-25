@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { Idea } from '@/types'
 import { useIdeaStore } from '@/store/ideaStore'
 import { useToast } from '@/components/ui/Toast'
@@ -28,6 +28,49 @@ function getInstagramCode(url: string): string | null {
   return m ? m[1] : null
 }
 
+function TikTokOEmbed({ url }: { url: string }) {
+  const [html, setHtml] = useState<string | null>(null)
+  const [error, setError] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    fetch(`https://www.tiktok.com/oembed?url=${encodeURIComponent(url)}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.html) setHtml(data.html)
+        else setError(true)
+      })
+      .catch(() => setError(true))
+  }, [url])
+
+  useEffect(() => {
+    if (!html || !containerRef.current) return
+    // Load TikTok embed script after injecting HTML
+    const existing = document.getElementById('tiktok-embed-js')
+    if (existing) { existing.remove() }
+    const script = document.createElement('script')
+    script.id = 'tiktok-embed-js'
+    script.src = 'https://www.tiktok.com/embed.js'
+    script.async = true
+    document.body.appendChild(script)
+  }, [html])
+
+  if (error) return null
+  if (!html) return (
+    <div className="h-20 rounded-xl skeleton flex items-center justify-center">
+      <span className="text-[11px] text-white/30">Loading TikTok…</span>
+    </div>
+  )
+
+  return (
+    <div
+      ref={containerRef}
+      className="rounded-xl overflow-hidden flex justify-center"
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  )
+}
+
 function VideoEmbed({ url }: { url: string }) {
   const ytId = getYouTubeId(url)
   const ttId = getTikTokId(url)
@@ -48,19 +91,7 @@ function VideoEmbed({ url }: { url: string }) {
   }
 
   if (ttId) {
-    return (
-      <div className="flex justify-center">
-        <iframe
-          src={`https://www.tiktok.com/embed/v2/${ttId}`}
-          className="rounded-xl"
-          width="340"
-          height="700"
-          allow="encrypted-media"
-          title="TikTok video"
-          style={{ maxWidth: '100%' }}
-        />
-      </div>
-    )
+    return <TikTokOEmbed url={url} />
   }
 
   if (igCode) {
@@ -78,7 +109,6 @@ function VideoEmbed({ url }: { url: string }) {
     )
   }
 
-  // Generic link fallback
   return (
     <a
       href={url}

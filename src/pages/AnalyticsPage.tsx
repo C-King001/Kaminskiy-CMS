@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { CheckCircle2, Clock, TrendingUp, FileText, Pencil, Check, X, ExternalLink } from 'lucide-react'
+import { CheckCircle2, Clock, TrendingUp, FileText, Pencil, Check, X, ExternalLink, Link2, HelpCircle, Zap } from 'lucide-react'
 import { useTeamStore } from '@/store/teamStore'
 import { useContentStore } from '@/store/contentStore'
 import type { SocialAccount } from '@/types'
@@ -116,24 +116,33 @@ function StatCard({
   )
 }
 
-// ─── Social account card ──────────────────────────────────────────────────────
+// ─── Connect modal ────────────────────────────────────────────────────────────
 
-function AccountCard({
+const API_NOTES: Record<string, string> = {
+  instagram: 'Requires Meta Developer API approval. Create an app at developers.facebook.com and request Instagram Basic Display permissions.',
+  facebook: 'Requires Meta Developer API approval. Create a Facebook App and request Pages API permissions.',
+  youtube: 'Requires Google Cloud Console project with YouTube Data API v3 enabled.',
+  tiktok: 'Requires TikTok for Developers account approval at developers.tiktok.com.',
+}
+
+function ConnectModal({
   platform,
   account,
   teamId,
+  onClose,
 }: {
   platform: PlatformDef
   account: SocialAccount | undefined
   teamId: string
+  onClose: () => void
 }) {
   const { upsertSocialAccount } = useTeamStore()
-  const [editing, setEditing] = useState(false)
-  const [handleVal, setHandleVal] = useState(account?.handle ?? '')
   const [nameVal, setNameVal] = useState(account?.account_name ?? '')
+  const [handleVal, setHandleVal] = useState(account?.handle ?? '')
+  const [tokenVal, setTokenVal] = useState('')
   const [saving, setSaving] = useState(false)
-
-  const isConnected = !!(account?.handle || account?.account_name)
+  const [saved, setSaved] = useState(false)
+  const note = API_NOTES[platform.key]
 
   const handleSave = async () => {
     setSaving(true)
@@ -145,110 +154,232 @@ function AccountCard({
         handle: handleVal.trim() || null,
         account_name: nameVal.trim() || null,
       })
-      setEditing(false)
+      setSaved(true)
+      setTimeout(onClose, 800)
     } finally {
       setSaving(false)
     }
   }
 
   return (
-    <div
-      className="rounded-2xl overflow-hidden border border-white/[0.06]"
-      style={{ backgroundColor: '#1a1d27' }}
-    >
-      {/* Gradient header bar */}
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
       <div
-        className="h-1.5 w-full"
-        style={{ background: platform.gradient }}
-      />
-
-      <div className="p-5">
-        <div className="flex items-center gap-3 mb-4">
-          <div
-            className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 text-white"
-            style={{ background: platform.gradient }}
-          >
+        className="relative w-full max-w-sm rounded-2xl border border-white/[0.1] overflow-hidden animate-fade-up shadow-2xl"
+        style={{ backgroundColor: '#13151f' }}
+      >
+        {/* Header */}
+        <div className="h-1.5" style={{ background: platform.gradient }} />
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-white/[0.07]">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white" style={{ background: platform.gradient }}>
             {platform.icon}
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-white">{platform.label}</p>
-            <p className="text-[11px] text-white/35 truncate">
-              {isConnected ? (account?.account_name || account?.handle) : 'Not set up yet'}
-            </p>
+          <div className="flex-1">
+            <p className="text-sm font-bold text-white">Connect {platform.label}</p>
+            <p className="text-[10px] text-white/30 mt-0.5">Add your account details</p>
           </div>
-          <span
-            className="text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full shrink-0"
-            style={
-              isConnected
-                ? { backgroundColor: '#22c55e18', color: '#22c55e', border: '1px solid #22c55e30' }
-                : { backgroundColor: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.08)' }
-            }
-          >
-            {isConnected ? 'Active' : 'Not set'}
-          </span>
+          <button onClick={onClose} className="p-1.5 text-white/25 hover:text-white/60 transition-colors">
+            <X size={14} />
+          </button>
         </div>
 
-        {editing ? (
-          <div className="flex flex-col gap-2">
+        <div className="px-5 py-4 flex flex-col gap-3">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-white/30">Account / Page Name</label>
             <input
-              autoFocus
               type="text"
               value={nameVal}
               onChange={(e) => setNameVal(e.target.value)}
-              placeholder="Account / Page name"
-              className="w-full px-3 py-2 text-xs rounded-xl border border-white/[0.1] bg-white/[0.04] text-white/80 placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-[#22c55e]/30"
+              placeholder={`e.g. Kaminskiy Care & Repair`}
+              className="w-full px-3 py-2.5 text-xs rounded-xl border border-white/[0.1] bg-white/[0.04] text-white/80 placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-[#22c55e]/30 transition-all"
             />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-white/30">Handle / Username</label>
             <input
               type="text"
               value={handleVal}
               onChange={(e) => setHandleVal(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSave()}
-              placeholder={`Handle (e.g. ${platform.defaultHandle})`}
-              className="w-full px-3 py-2 text-xs rounded-xl border border-white/[0.1] bg-white/[0.04] text-white/80 placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-[#22c55e]/30"
+              placeholder={platform.defaultHandle}
+              className="w-full px-3 py-2.5 text-xs rounded-xl border border-white/[0.1] bg-white/[0.04] text-white/80 placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-[#22c55e]/30 transition-all"
             />
-            <div className="flex gap-2 mt-1">
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold text-white btn-glow disabled:opacity-40"
-                style={{ background: platform.gradient }}
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-white/30 flex items-center gap-1.5">
+              <Link2 size={9} />
+              API Token / Access Token
+              <span className="text-[9px] text-white/20 normal-case font-normal ml-1">Optional — for future API sync</span>
+            </label>
+            <input
+              type="password"
+              value={tokenVal}
+              onChange={(e) => setTokenVal(e.target.value)}
+              placeholder="Paste access token here..."
+              className="w-full px-3 py-2.5 text-xs rounded-xl border border-white/[0.1] bg-white/[0.04] text-white/80 placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-[#22c55e]/30 transition-all font-mono"
+            />
+          </div>
+
+          {/* Platform note */}
+          {note && (
+            <div className="flex gap-2 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+              <HelpCircle size={12} className="text-white/30 shrink-0 mt-0.5" />
+              <p className="text-[10px] text-white/30 leading-relaxed">{note}</p>
+            </div>
+          )}
+
+          <button
+            onClick={handleSave}
+            disabled={saving || saved || (!nameVal.trim() && !handleVal.trim())}
+            className="w-full py-2.5 rounded-xl text-sm font-bold text-white btn-glow transition-all disabled:opacity-40 flex items-center justify-center gap-2"
+            style={{ background: saved ? 'linear-gradient(135deg,#16a34a,#22c55e)' : platform.gradient }}
+          >
+            {saved ? <><Check size={14} /> Connected!</> : saving ? 'Saving…' : <><Zap size={13} /> Save Connection</>}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Weekly performance ───────────────────────────────────────────────────────
+
+function WeeklyPerformance({ cards }: { cards: import('@/types').ContentCard[] }) {
+  const now = new Date()
+  const startOfWeek = new Date(now)
+  startOfWeek.setDate(now.getDate() - now.getDay())
+  startOfWeek.setHours(0, 0, 0, 0)
+
+  const thisWeekPosted = cards.filter((c) => {
+    if (c.status !== 'posted') return false
+    const d = new Date(c.updated_at ?? c.created_at)
+    return d >= startOfWeek
+  }).length
+
+  const thisWeekScheduled = cards.filter((c) => {
+    if (!c.scheduled_date) return false
+    const d = new Date(c.scheduled_date)
+    const endOfWeek = new Date(startOfWeek)
+    endOfWeek.setDate(startOfWeek.getDate() + 7)
+    return d >= startOfWeek && d < endOfWeek
+  }).length
+
+  const inReview = cards.filter((c) =>
+    ['in_review', 'submitted', 'resubmitted', 'stuart_approval', 'sergei_approval'].includes(c.status)
+  ).length
+
+  // Top content type by volume
+  const typeCounts: Record<string, number> = {}
+  for (const c of cards) {
+    typeCounts[c.content_type] = (typeCounts[c.content_type] ?? 0) + 1
+  }
+  const topType = Object.entries(typeCounts).sort((a, b) => b[1] - a[1])[0]
+
+  const items = [
+    { label: 'Published This Week', value: thisWeekPosted, color: '#22c55e' },
+    { label: 'Scheduled This Week', value: thisWeekScheduled, color: '#3b82f6' },
+    { label: 'Pending Review', value: inReview, color: '#f59e0b' },
+    { label: 'Top Format', value: topType ? topType[0].replace('_', ' ') : '—', color: '#8b5cf6', isText: true },
+  ]
+
+  return (
+    <div
+      className="rounded-2xl p-5 border border-white/[0.06] mb-8"
+      style={{ backgroundColor: '#1a1d27' }}
+    >
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-6 h-6 rounded-lg bg-[#22c55e]/15 flex items-center justify-center">
+          <Zap size={12} className="text-[#22c55e]" />
+        </div>
+        <div>
+          <h3 className="text-[11px] font-bold uppercase tracking-widest text-white/40">Weekly Performance Summary</h3>
+          <p className="text-[10px] text-white/20">Internal CMS data — no external API required</p>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {items.map((item) => (
+          <div key={item.label} className="flex flex-col gap-1 p-3 rounded-xl" style={{ backgroundColor: `${item.color}08`, border: `1px solid ${item.color}15` }}>
+            <p className="text-[10px] text-white/30 font-medium leading-tight">{item.label}</p>
+            <p className="text-2xl font-black" style={{ color: item.color }}>
+              {'isText' in item && item.isText ? (
+                <span className="text-sm font-bold capitalize">{item.value}</span>
+              ) : item.value}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ─── Social account card ──────────────────────────────────────────────────────
+
+function AccountCard({
+  platform,
+  account,
+  teamId,
+}: {
+  platform: PlatformDef
+  account: SocialAccount | undefined
+  teamId: string
+}) {
+  const [connectOpen, setConnectOpen] = useState(false)
+  const isConnected = !!(account?.handle || account?.account_name)
+
+  return (
+    <>
+      <div
+        className="rounded-2xl overflow-hidden border border-white/[0.06] transition-all hover:border-white/[0.1]"
+        style={{ backgroundColor: '#1a1d27' }}
+      >
+        <div className="h-1.5 w-full" style={{ background: platform.gradient }} />
+        <div className="p-5">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 text-white" style={{ background: platform.gradient }}>
+              {platform.icon}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-white">{platform.label}</p>
+              <p className="text-[11px] text-white/35 truncate">
+                {isConnected ? (account?.account_name || account?.handle) : 'Not connected'}
+              </p>
+            </div>
+            <div className="flex items-center gap-1.5">
+              {isConnected && <span className="w-2 h-2 rounded-full bg-[#22c55e] animate-pulse" />}
+              <span
+                className="text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full"
+                style={
+                  isConnected
+                    ? { backgroundColor: '#22c55e18', color: '#22c55e', border: '1px solid #22c55e30' }
+                    : { backgroundColor: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.08)' }
+                }
               >
-                <Check size={12} /> {saving ? 'Saving…' : 'Save'}
-              </button>
-              <button
-                onClick={() => setEditing(false)}
-                className="w-9 flex items-center justify-center rounded-xl border border-white/[0.08] text-white/40 hover:text-white/70 transition-all"
-              >
-                <X size={13} />
-              </button>
+                {isConnected ? 'Connected' : 'Not set'}
+              </span>
             </div>
           </div>
-        ) : (
           <div className="flex items-center gap-2">
             {account?.handle && (
               <span className="text-[11px] text-white/40 font-mono flex-1 truncate">{account.handle}</span>
             )}
             <button
-              onClick={() => setEditing(true)}
-              className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/[0.08] text-[11px] text-white/40 hover:text-white/70 hover:border-white/[0.18] transition-all"
+              onClick={() => setConnectOpen(true)}
+              className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold text-white btn-glow transition-all"
+              style={{ background: isConnected ? 'rgba(34,197,94,0.12)' : platform.gradient, color: isConnected ? '#22c55e' : 'white', border: isConnected ? '1px solid rgba(34,197,94,0.25)' : 'none' }}
             >
-              <Pencil size={10} />
-              {isConnected ? 'Edit' : 'Set up'}
+              {isConnected ? <><Pencil size={10} /> Edit</> : <><Zap size={10} /> Connect</>}
             </button>
             {account?.profile_url && (
-              <a
-                href={account.profile_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-1.5 rounded-lg text-white/20 hover:text-white/50 transition-all"
-              >
+              <a href={account.profile_url} target="_blank" rel="noopener noreferrer" className="p-1.5 text-white/20 hover:text-white/50 transition-all">
                 <ExternalLink size={11} />
               </a>
             )}
           </div>
-        )}
+        </div>
       </div>
-    </div>
+      {connectOpen && (
+        <ConnectModal platform={platform} account={account} teamId={teamId} onClose={() => setConnectOpen(false)} />
+      )}
+    </>
   )
 }
 
@@ -348,6 +479,9 @@ export function AnalyticsPage() {
           ))}
         </div>
       )}
+
+      {/* Weekly performance summary (internal — no API needed) */}
+      <WeeklyPerformance cards={cards} />
 
       {/* Hero stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
