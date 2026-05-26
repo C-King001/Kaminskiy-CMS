@@ -12,6 +12,9 @@ import { AdminPage } from '@/pages/AdminPage'
 import { AnalyticsPage } from '@/pages/AnalyticsPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
+import { DataDeletionPage } from '@/pages/DataDeletionPage'
+import { PrivacyPolicyPage } from '@/pages/PrivacyPolicyPage'
+import { TermsPage } from '@/pages/TermsPage'
 
 export default function App() {
   return (
@@ -19,6 +22,9 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/data-deletion" element={<DataDeletionPage />} />
+          <Route path="/privacy" element={<PrivacyPolicyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
 
           {/* Main app */}
           <Route
