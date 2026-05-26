@@ -4,6 +4,7 @@ export interface Team {
   slug: string
   color: string
   description: string | null
+  logo_url: string | null
   created_at: string
 }
 

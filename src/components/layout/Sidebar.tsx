@@ -48,8 +48,12 @@ function TeamSwitcher({ collapsed }: { collapsed: boolean }) {
           <div className="w-5 h-5 rounded-md shrink-0 flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #22c55e, #3b82f6, #f97316)' }}>
             <Globe size={11} className="text-white" />
           </div>
+        ) : current?.logo_url ? (
+          <img src={current.logo_url} alt={current.name} className="w-5 h-5 rounded-md shrink-0 object-cover" />
         ) : (
-          <div className="w-5 h-5 rounded-md shrink-0" style={{ backgroundColor: current?.color ?? '#22c55e' }} />
+          <div className="w-5 h-5 rounded-md shrink-0 flex items-center justify-center" style={{ backgroundColor: current?.color ?? '#22c55e' }}>
+            <span className="text-[9px] font-black text-white">{(current?.name ?? 'T').charAt(0).toUpperCase()}</span>
+          </div>
         )}
         {!collapsed && (
           <>
@@ -89,7 +93,13 @@ function TeamSwitcher({ collapsed }: { collapsed: boolean }) {
               onClick={() => { setCurrentTeam(team.id); setOpen(false) }}
               className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-white/[0.06] transition-all text-left"
             >
-              <div className="w-4 h-4 rounded-md shrink-0" style={{ backgroundColor: team.color }} />
+              {team.logo_url ? (
+                <img src={team.logo_url} alt={team.name} className="w-4 h-4 rounded-md shrink-0 object-cover" />
+              ) : (
+                <div className="w-4 h-4 rounded-md shrink-0 flex items-center justify-center" style={{ backgroundColor: team.color }}>
+                  <span className="text-[7px] font-black text-white">{team.name.charAt(0).toUpperCase()}</span>
+                </div>
+              )}
               <span className="flex-1 text-xs font-semibold text-white/70 truncate">{team.name}</span>
               {!isAllTeamsView && team.id === currentTeamId && <Check size={11} className="text-[#22c55e] shrink-0" />}
             </button>

@@ -21,6 +21,7 @@ interface TeamState {
   setAllTeamsView: (v: boolean) => void
   joinTeam: (teamId: string, userId: string) => Promise<void>
   leaveTeam: (teamId: string, userId: string) => Promise<void>
+  updateTeam: (id: string, updates: Partial<Pick<Team, 'name' | 'description' | 'color' | 'logo_url'>>) => Promise<void>
   upsertSocialAccount: (account: Partial<SocialAccount> & { team_id: string; platform: string }) => Promise<void>
   currentTeam: () => Team | null
 }
@@ -96,6 +97,14 @@ export const useTeamStore = create<TeamState>()(
           .eq('team_id', teamId)
           .eq('user_id', userId)
         set((state) => ({ myTeamIds: state.myTeamIds.filter((id) => id !== teamId) }))
+      },
+
+      updateTeam: async (id, updates) => {
+        const { data, error } = await supabase.from('teams').update(updates).eq('id', id).select().single()
+        if (error) throw error
+        set((state) => ({
+          teams: state.teams.map((t) => (t.id === id ? { ...t, ...data } : t)),
+        }))
       },
 
       upsertSocialAccount: async (account) => {
